@@ -1,6 +1,8 @@
 # Java class dump
-Prints a user friendly representation of a java classfile.
-The program is heavilly commented, so further documentation in seperate file is deemed unnecessary.
+Prints a user friendly representation of a java class-file.
+The program is heavily commented, so further documentation in separate file is
+deemed unnecessary.
 
-## Purpose
-For academic purposes.
+## Purpose & License
+For academic purposes and is available under the MIT license, which should be
+present in this repository.
