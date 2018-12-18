@@ -85,7 +85,7 @@ def print_cp_info(jc, constant_pool_count):
             read_bytes = int.from_bytes(jc.read(2), byteorder='big')
         value_bin = jc.read(read_bytes)
         # Strings
-        if tag in [1]:
+        if tag == 1:
             value = codecs.decode(value_bin,"utf-8")
             print("#{:5}: {:5} = {}" .format(counter, tag, value))
         # Ints
@@ -107,9 +107,10 @@ def print_cp_info(jc, constant_pool_count):
             print("#{:5}: {:5} = {}" .format(counter, tag, value))
             counter+=1
         # Index
-        elif tag in [7,8]:
-            value = int.from_bytes(value_bin, byteorder='big')
-            print("#{:5}: {:5} = {}" .format(counter, tag, value))
+        elif tag == 7:
+            print_class_info(jc, counter, value_bin)
+        elif tag == 8:
+            print_string_info(jc, counter, value_bin)
         # Index pair
         elif tag in [9, 10, 11, 12]:
             value1 = int.from_bytes(value_bin, byteorder='big')
@@ -246,6 +247,32 @@ def print_attributes(jc, attributes_count):
         attribute_lenght = int.from_bytes(jc.read(4), byteorder='big')
         value = int.from_bytes(jc.read(attribute_lenght), byteorder='big')
         print(" - {} ( {} )" .format(attribute_name_index, attribute_lenght))
+
+# Constant pool descriptors
+def print_class_info(jc, counter, value_bin):
+    """
+    Print constant class (or interface) information.
+
+    Data structure:
+    U1: tag = 7
+    U2: name_index - Contains index in the CP which contains an UTF-8 encoded
+        name of a class or interface.
+    """
+    tag = 7
+    value = int.from_bytes(value_bin, byteorder='big')
+    print("#{:5}: {:5} = {}" .format(counter, tag, value))
+
+def print_string_info(jc, counter, value_bin):
+    """
+    Tag(8): Print constant String information.
+
+    Data structure:
+    U1: tag = 8
+    U2: string_index - Index of CP containing UTF-8 string.
+    """
+    tag = 8
+    value = int.from_bytes(value_bin, byteorder='big')
+    print("#{:5}: {:5} = {}" .format(counter, tag, value))
 
 ################################################################################
 
