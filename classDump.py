@@ -108,16 +108,18 @@ def print_cp_info(jc, constant_pool_count):
             counter+=1
         # Index
         elif tag == 7:
-            print_class_info(jc, counter, value_bin)
+            value = print_class_info(jc, counter, value_bin)
         elif tag == 8:
-            print_string_info(jc, counter, value_bin)
+            value = print_string_info(jc, counter, value_bin)
         # Index pair
-        elif tag in [9, 10, 11, 12]:
-            value1 = int.from_bytes(value_bin, byteorder='big')
-            value_bin2 = jc.read(2)
-            value2 = int.from_bytes(value_bin2, byteorder='big')
-            value = (value1, value2)
-            print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+        elif tag == 9:
+            value = print_field_ref_info(jc, counter, value_bin)
+        elif tag == 10:
+            value = print_method_ref_info(jc, counter, value_bin)
+        elif tag == 11:
+            value = print_interface_method_ref_info(jc, counter, value_bin)
+        elif tag == 12:
+            value = print_interface_method_ref_info(jc, counter, value_bin)
         elif tag == 15:
             value1 = int.from_bytes(value_bin, byteorder='big')
             value_bin2 = jc.read(2)
@@ -251,7 +253,7 @@ def print_attributes(jc, attributes_count):
 # Constant pool descriptors
 def print_class_info(jc, counter, value_bin):
     """
-    Print constant class (or interface) information.
+    CONSTANT_Class_info: Print constant class (or interface) information.
 
     Data structure:
     U1: tag = 7
@@ -261,10 +263,11 @@ def print_class_info(jc, counter, value_bin):
     tag = 7
     value = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
+    return value
 
 def print_string_info(jc, counter, value_bin):
     """
-    Tag(8): Print constant String information.
+    CONSTANT_String_info: Print constant String information.
 
     Data structure:
     U1: tag = 8
@@ -273,6 +276,73 @@ def print_string_info(jc, counter, value_bin):
     tag = 8
     value = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
+    return value
+
+def print_field_ref_info(jc, counter, value_bin):
+    """
+    CONSTANT_Fieldref_info: Print Field information.
+
+    Data structure:
+    U1: tag = 9
+    U2: class_index - valid index in the CP. Must point to an Class type.
+    U2: name_and_type_index - calid index in the CP
+    Same data structure as
+    """
+    tag         = 9
+    value1      = int.from_bytes(value_bin, byteorder='big')
+    value_bin2  = jc.read(2)
+    value2      = int.from_bytes(value_bin2, byteorder='big')
+    value       = (value1, value2)
+    print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+
+def print_method_ref_info(jc, counter, value_bin):
+    """
+    CONSTANT_Methodref_info: Print Method information.
+
+    Data structure:
+    U1: tag = 10
+    U2: class_index - valid index in the CP - Must point to an interface type.
+    U2: name_and_type_index
+    """
+    tag         = 10
+    value1      = int.from_bytes(value_bin, byteorder='big')
+    value_bin2  = jc.read(2)
+    value2      = int.from_bytes(value_bin2, byteorder='big')
+    value       = (value1, value2)
+    print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+
+def print_interface_method_ref_info(jc, counter, value_bin):
+    """
+    CONSTANT_InterfaceMethodref_info: Print Interface method information.
+
+    Data structure:
+    U1: tag = 11
+    U2: class_index - valid index in the CP - Can point to either class or
+        interface type
+    U2: name_and_type_index
+    """
+    tag         = 11
+    value1      = int.from_bytes(value_bin, byteorder='big')
+    value_bin2  = jc.read(2)
+    value2      = int.from_bytes(value_bin2, byteorder='big')
+    value       = (value1, value2)
+    print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+
+def print_interface_method_ref_info(jc, counter, value_bin):
+    """
+    CONSTANT_NameAndType_info: Print Name and type information.
+
+    Data structure:
+    U1: tag = 12
+    U2: name_index - valid CP index.
+    U2: descriptor_index - valid CP index.
+    """
+    tag         = 12
+    value1      = int.from_bytes(value_bin, byteorder='big')
+    value_bin2  = jc.read(2)
+    value2      = int.from_bytes(value_bin2, byteorder='big')
+    return (value1, value2)
+    print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
 
 ################################################################################
 
