@@ -86,8 +86,7 @@ def print_cp_info(jc, constant_pool_count):
 
         value_bin = jc.read(read_bytes)
         if tag == 1:
-            value = codecs.decode(value_bin,"utf-8")
-            print("#{:5}: {:5} = {}" .format(counter, tag, value))
+            value = print_utf8_info(jc, counter, value_bin)
         elif tag == 3:
             value = print_integer_info(jc, counter, value_bin)
         elif tag == 4:
@@ -107,7 +106,7 @@ def print_cp_info(jc, constant_pool_count):
         elif tag == 11:
             value = print_interface_method_ref_info(jc, counter, value_bin)
         elif tag == 12:
-            value = print_interface_method_ref_info(jc, counter, value_bin)
+            value = print_name_and_type_info(jc, counter, value_bin)
         elif tag == 15:
             value1 = int.from_bytes(value_bin, byteorder='big')
             value_bin2 = jc.read(2)
@@ -240,7 +239,18 @@ def print_attributes(jc, attributes_count):
 
 # Constant pool descriptors
 
-# TAG - 1 - UTF-8
+def print_utf8_info(jc, counter, value_bin):
+    """
+     CONSTANT_Utf8_info: Print UTF-String
+
+     Data structure:
+     U1: Tag = 1
+     U2: Length
+     U1: bytes[Length] - UTF-8 encoded characters
+    """
+    value = codecs.decode(value_bin,"utf-8")
+    print("#{:5}: {:5} = {}" .format(counter, tag, value))
+    return value
 
 def print_integer_info(jc, counter, value_bin):
     """
@@ -345,8 +355,8 @@ def print_field_ref_info(jc, counter, value_bin):
     value1      = int.from_bytes(value_bin, byteorder='big')
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
-    value       = (value1, value2)
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+    value       = (value1, value2)
 
 def print_method_ref_info(jc, counter, value_bin):
     """
@@ -361,8 +371,8 @@ def print_method_ref_info(jc, counter, value_bin):
     value1      = int.from_bytes(value_bin, byteorder='big')
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
-    value       = (value1, value2)
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+    return (value1, value2)
 
 def print_interface_method_ref_info(jc, counter, value_bin):
     """
@@ -378,10 +388,10 @@ def print_interface_method_ref_info(jc, counter, value_bin):
     value1      = int.from_bytes(value_bin, byteorder='big')
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
-    value       = (value1, value2)
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+    return (value1, value2)
 
-def print_interface_method_ref_info(jc, counter, value_bin):
+def print_name_and_type_info(jc, counter, value_bin):
     """
     CONSTANT_NameAndType_info: Print Name and type information.
 
@@ -394,8 +404,8 @@ def print_interface_method_ref_info(jc, counter, value_bin):
     value1      = int.from_bytes(value_bin, byteorder='big')
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
-    return (value1, value2)
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+    return (value1, value2)
 
 # TAG - 15 - MethodHandle
 # TAG - 16 - MethodType
