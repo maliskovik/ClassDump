@@ -111,6 +111,10 @@ def print_cp_info(jc, constant_pool_count):
             print_name_and_type_info(counter, value_bin)
         elif tag == 15:
             print_method_handle_info(counter, value_bin)
+        elif tag == 16:
+            print_method_type_info(counter, value_bin)
+        elif tag == 18:
+            print_method_type_info(counter, value_bin)
         else:
             print("ERROR!\nUnknown tag {} at index {}!" .format(tag, counter))
             sys.exit(1)
@@ -240,8 +244,8 @@ def print_utf8_info(counter, value_bin):
      CONSTANT_Utf8_info: Print UTF-String
 
      Data structure:
-     U1: Tag = 1
-     U2: Length
+     U1: tag = 1
+     U2: length
      U1: bytes[Length] - UTF-8 encoded characters
     """
     tag = 1
@@ -254,7 +258,7 @@ def print_integer_info(counter, value_bin):
     CONSTANT_Integer_info: Print integer
 
     Data structure:
-    U1: Tag = 3
+    U1: tag = 3
     U4: bytes = Value of the Int constant
     Uses same structure as CONSTANT_Integer_info
     """
@@ -268,7 +272,7 @@ def print_float_info(counter, value_bin):
     CONSTANT_Float_info: Print float
 
     Data structure:
-    U1: Tag = 4
+    U1: tag = 4
     U4: bytes = Value of the Float constant
     Uses same structure as CONSTANT_Integer_info
     """
@@ -282,9 +286,9 @@ def print_long_info(counter, value_bin):
     CONSTANT_Long_info: Print float
 
     Data structure:
-    U1: Tag = 5
+    U1: tag = 5
     U4: high_bytes
-    U4: Low bytes
+    U4: low_bytes
     ---
     Note: Takes 2 entries in the constant pool table - so we must skip 1 couter.
     As noted in official documentation: 'In retrospect, making 8-byte constants
@@ -302,9 +306,9 @@ def print_double_info(counter, value_bin):
     CONSTANT_Double_info: Print double
 
     Data structure:
-    U1: Tag = 6
+    U1: tag = 6
     U4: high_bytes
-    U4: Low bytes
+    U4: low_bytes
     ---
     Note: Takes 2 entries in the constant pool table - so we must skip 1 couter.
     As noted in official documentation: 'In retrospect, making 8-byte constants
@@ -414,7 +418,7 @@ def print_method_handle_info(counter, value_bin):
     CONSTANT_MethodHandle_info: Prints Method handle information.
 
     Data structure:
-    U1: Tag = 15
+    U1: tag = 15
     U1: reference_kind - values 1-9
     U2: reference_index - Index of the CP table.
     ---
@@ -430,8 +434,34 @@ def print_method_handle_info(counter, value_bin):
     print("#{:5}: {:5} = [{} -> {}]" .format(counter, tag, method_handel_tags[value1], value2))
     constant_pool.append((value1, value2))
 
-# TAG - 16 - MethodType
+def print_method_type_info(counter, value_bin):
+    """
+    CONSTANT_MethodType_info: Print Method type info.
+
+    Data structure:
+    U1: tag = 16
+    U2: descriptor_index: CP table index -> Points to a method descriptor.
+    """
+    tag =  16
+    value = int.from_bytes(value_bin, byteorder='big')
+    print("#{:5}: {:5} = {}" .format(counter, tag, value))
+    constant_pool.append(value)
 # TAG - 18 - InvokeDynamic
+def print_invoke_dynamic_info(counter, value_bin):
+    """
+     CONSTANT_InvokeDynamic_info: Describes the invokedynamic instruction.
+
+     Data structure:
+     U1: tag = 18
+     U2: bootstrap_method_attr_index - index in the bootstrap_methods
+     U2: name_and_type_index valid index of the CP table.
+    """
+    tag = 18
+    value1 = int.from_bytes(value_bin, byteorder='big')
+    value_bin2 = jc.read(2)
+    value2 = int.from_bytes(value_bin2, byteorder='big')
+    print("#{:5}: {:5} = [{} -> {}]" .format(counter, tag, method_handel_tags[value1], value2))
+    constant_pool.append((value1, value2))
 
 ################################################################################
 
