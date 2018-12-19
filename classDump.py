@@ -251,6 +251,13 @@ def print_attributes(jc, attributes_count):
         print(" - {} ( {} )" .format(attribute_name_index, attribute_lenght))
 
 # Constant pool descriptors
+
+# TAG - 1 - UTF-8
+# TAG - 3 - Integer
+# TAG - 4 - Float
+# TAG - 5 - Long
+# TAG - 6 - Double
+
 def print_class_info(jc, counter, value_bin):
     """
     CONSTANT_Class_info: Print constant class (or interface) information.
@@ -343,6 +350,10 @@ def print_interface_method_ref_info(jc, counter, value_bin):
     value2      = int.from_bytes(value_bin2, byteorder='big')
     return (value1, value2)
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+
+# TAG - 15 - MethodHandle
+# TAG - 16 - MethodType
+# TAG - 18 - InvokeDynamic
 
 ################################################################################
 
