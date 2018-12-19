@@ -114,128 +114,10 @@ def print_cp_info(jc, constant_pool_count):
         elif tag == 16:
             print_method_type_info(counter, value_bin)
         elif tag == 18:
-            print_method_type_info(counter, value_bin)
+            print_invoke_dynamic_info(counter, value_bin)
         else:
             print("ERROR!\nUnknown tag {} at index {}!" .format(tag, counter))
             sys.exit(1)
-
-def print_interfaces(jc, interfaces_count):
-    """
-    Print all interfaces.
-
-    Each interface has:
-    u1 - tag which is of type Class
-    u2 - index pointing at the object in constant pool table
-    """
-    for counter in range(0, interfaces_count):
-        tag = int.from_bytes(jc.read(1), byteorder='big')
-        index = int.from_bytes(jc.read(2), byteorder='big')
-        print("#{:5}: {5}" .format(tags[tag][0], index))
-
-def print_fields (jc, fields_count):
-        """
-        Print all fields.
-
-        Each field has:
-        u2 - access flags
-        u2 - named index
-        u2 - descriptor Index
-        u2 - attributes count
-        [attributes_count] attributes_info
-
-        Access flags are:
-        0x0001 - public
-        0x0002 - private
-        0x0004 - protected
-        0x0008 - static
-        0x0010 - final
-        0x0040 - volatile
-        0x0080 - transient
-        0x1000 - synthetic
-        0x4000 - enum
-        """
-        for counter in range(0, fields_count):
-            access_flags = codecs.decode(binascii.hexlify(jc.read(2)))
-            named_index = int.from_bytes(jc.read(2), byteorder='big')
-            descriptor_index = int.from_bytes(jc.read(2), byteorder='big')
-            attributes_count = int.from_bytes(jc.read(2), byteorder='big')
-            if attributes_count:
-                print(" > Attributes:")
-                print_attributes(jc, attributes_count)
-                print(" > ---\n")
-            print("{} | [{}, {}] ( {} ):" .format(access_flags, named_index, descriptor_index, attributes_count))
-
-def print_methods(jc, methods_count):
-    """
-    Print all methods
-
-    u2 - access flags
-    u2 - named index
-    u2 - descriptor index
-    u2 - attributes count
-    [attributes_count] attributes_info
-
-    Access flags:
-    0x0001 - PUBLIC
-    0x0002 - PRIVATE
-    0x0004 - PROTECTED
-    0x0008 - STATIC
-    0x0010 - FINAL
-    0x0020 - SYNCHRONIZED
-    0x0040 - BRIDGE
-    0x0080 - VARARGS
-    0x0100 - NATIVE
-    0x0400 - ABSTRACT
-    0x0800 - STRICT
-    0x1000 - SYNTHETIC
-    """
-    for counter in range(0, methods_count):
-        access_flags = codecs.decode(binascii.hexlify(jc.read(2)))
-        named_index = int.from_bytes(jc.read(2), byteorder='big')
-        descriptor_index = int.from_bytes(jc.read(2), byteorder='big')
-        attributes_count = int.from_bytes(jc.read(2), byteorder='big')
-        if attributes_count:
-            print(" > Attributes:")
-            print_attributes(jc, attributes_count)
-            print(" > ---\n")
-
-        print("{} | [{}, {}] ( {} ):" .format(access_flags, named_index, descriptor_index, attributes_count))
-
-def print_exception_table(jc, exception_table_length):
-    """
-    Print exception table
-
-    Each exception has 4 values
-    - start_pc from which point in code an exception is active
-    - end_pc to which point in code, an exception is valid
-    - handler_pc -start of the exception handle
-    - catch_type - exception type.
-    All 4 are constant_pool index values.
-    """
-
-    print("Exception table({})[start_pc, end_pc, handler_pc, catch_type]:" .format(exception_table_length))
-
-    for jc_exception in range(0, exception_table_length):
-        start_pc = int.from_bytes(jc.read(2), byteorder='big')
-        end_pc = int.from_bytes(jc.read(2), byteorder='big')
-        handler_pc = int.from_bytes(jc.read(2), byteorder='big')
-        catch_type = int.from_bytes(jc.read(2), byteorder='big')
-        print("-> {} | {} | {} | {}" .format(start_pc, end_pc, handler_pc, catch_type))
-    print
-
-def print_attributes(jc, attributes_count):
-    """
-    Attributes list
-
-    u2 - Attribute name index
-    u4 - attribute length
-    u1 - info[attribute length]
-    """
-    for a_count in range(0, attributes_count):
-        attribute_name_index = int.from_bytes(jc.read(2), byteorder='big')
-        attribute_lenght = int.from_bytes(jc.read(4), byteorder='big')
-        value = int.from_bytes(jc.read(attribute_lenght), byteorder='big')
-        print(" - {} ( {} )" .format(attribute_name_index, attribute_lenght))
 
 # Constant pool descriptors
 
@@ -446,7 +328,7 @@ def print_method_type_info(counter, value_bin):
     value = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
-# TAG - 18 - InvokeDynamic
+
 def print_invoke_dynamic_info(counter, value_bin):
     """
      CONSTANT_InvokeDynamic_info: Describes the invokedynamic instruction.
@@ -462,6 +344,124 @@ def print_invoke_dynamic_info(counter, value_bin):
     value2 = int.from_bytes(value_bin2, byteorder='big')
     print("#{:5}: {:5} = [{} -> {}]" .format(counter, tag, method_handel_tags[value1], value2))
     constant_pool.append((value1, value2))
+
+def print_interfaces(jc, interfaces_count):
+    """
+    Print all interfaces.
+
+    Each interface has:
+    u1 - tag which is of type Class
+    u2 - index pointing at the object in constant pool table
+    """
+    for counter in range(0, interfaces_count):
+        tag = int.from_bytes(jc.read(1), byteorder='big')
+        index = int.from_bytes(jc.read(2), byteorder='big')
+        print("#{:5}: {5}" .format(tags[tag][0], index))
+
+def print_fields (jc, fields_count):
+        """
+        Print all fields.
+
+        Each field has:
+        u2 - access flags
+        u2 - named index
+        u2 - descriptor Index
+        u2 - attributes count
+        [attributes_count] attributes_info
+
+        Access flags are:
+        0x0001 - public
+        0x0002 - private
+        0x0004 - protected
+        0x0008 - static
+        0x0010 - final
+        0x0040 - volatile
+        0x0080 - transient
+        0x1000 - synthetic
+        0x4000 - enum
+        """
+        for counter in range(0, fields_count):
+            access_flags = codecs.decode(binascii.hexlify(jc.read(2)))
+            named_index = int.from_bytes(jc.read(2), byteorder='big')
+            descriptor_index = int.from_bytes(jc.read(2), byteorder='big')
+            attributes_count = int.from_bytes(jc.read(2), byteorder='big')
+            if attributes_count:
+                print(" > Attributes:")
+                print_attributes(jc, attributes_count)
+                print(" > ---\n")
+            print("{} | [{}, {}] ( {} ):" .format(access_flags, named_index, descriptor_index, attributes_count))
+
+def print_methods(jc, methods_count):
+    """
+    Print all methods
+
+    u2 - access flags
+    u2 - named index
+    u2 - descriptor index
+    u2 - attributes count
+    [attributes_count] attributes_info
+
+    Access flags:
+    0x0001 - PUBLIC
+    0x0002 - PRIVATE
+    0x0004 - PROTECTED
+    0x0008 - STATIC
+    0x0010 - FINAL
+    0x0020 - SYNCHRONIZED
+    0x0040 - BRIDGE
+    0x0080 - VARARGS
+    0x0100 - NATIVE
+    0x0400 - ABSTRACT
+    0x0800 - STRICT
+    0x1000 - SYNTHETIC
+    """
+    for counter in range(0, methods_count):
+        access_flags = codecs.decode(binascii.hexlify(jc.read(2)))
+        named_index = int.from_bytes(jc.read(2), byteorder='big')
+        descriptor_index = int.from_bytes(jc.read(2), byteorder='big')
+        attributes_count = int.from_bytes(jc.read(2), byteorder='big')
+        if attributes_count:
+            print(" > Attributes:")
+            print_attributes(jc, attributes_count)
+            print(" > ---\n")
+
+        print("{} | [{}, {}] ( {} ):" .format(access_flags, named_index, descriptor_index, attributes_count))
+
+def print_exception_table(jc, exception_table_length):
+    """
+    Print exception table
+
+    Each exception has 4 values
+    - start_pc from which point in code an exception is active
+    - end_pc to which point in code, an exception is valid
+    - handler_pc -start of the exception handle
+    - catch_type - exception type.
+    All 4 are constant_pool index values.
+    """
+
+    print("Exception table({})[start_pc, end_pc, handler_pc, catch_type]:" .format(exception_table_length))
+
+    for jc_exception in range(0, exception_table_length):
+        start_pc = int.from_bytes(jc.read(2), byteorder='big')
+        end_pc = int.from_bytes(jc.read(2), byteorder='big')
+        handler_pc = int.from_bytes(jc.read(2), byteorder='big')
+        catch_type = int.from_bytes(jc.read(2), byteorder='big')
+        print("-> {} | {} | {} | {}" .format(start_pc, end_pc, handler_pc, catch_type))
+    print
+
+def print_attributes(jc, attributes_count):
+    """
+    Attributes list
+
+    u2 - Attribute name index
+    u4 - attribute length
+    u1 - info[attribute length]
+    """
+    for a_count in range(0, attributes_count):
+        attribute_name_index = int.from_bytes(jc.read(2), byteorder='big')
+        attribute_lenght = int.from_bytes(jc.read(4), byteorder='big')
+        value = int.from_bytes(jc.read(attribute_lenght), byteorder='big')
+        print(" - {} ( {} )" .format(attribute_name_index, attribute_lenght))
 
 ################################################################################
 
