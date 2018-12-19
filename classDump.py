@@ -86,38 +86,34 @@ def print_cp_info(jc, constant_pool_count):
 
         value_bin = jc.read(read_bytes)
         if tag == 1:
-            value = print_utf8_info(jc, counter, value_bin)
+            print_utf8_info(counter, value_bin)
         elif tag == 3:
-            value = print_integer_info(jc, counter, value_bin)
+            print_integer_info(counter, value_bin)
         elif tag == 4:
-            value = print_float_info(jc, counter, value_bin)
+            print_float_info(counter, value_bin)
         elif tag == 5:
-            value, counter = print_long_info(jc, counter, value_bin)
+            print_long_info(counter, value_bin)
+            counter+=1
         elif tag == 6:
-            value, counter = print_double_info(jc, counter, value_bin)
+            print_double_info(counter, value_bin)
+            counter+=1
         elif tag == 7:
-            value = print_class_info(jc, counter, value_bin)
+            print_class_info(counter, value_bin)
         elif tag == 8:
-            value = print_string_info(jc, counter, value_bin)
+            print_string_info(counter, value_bin)
         elif tag == 9:
-            value = print_field_ref_info(jc, counter, value_bin)
+            print_field_ref_info(counter, value_bin)
         elif tag == 10:
-            value = print_method_ref_info(jc, counter, value_bin)
+            print_method_ref_info(counter, value_bin)
         elif tag == 11:
-            value = print_interface_method_ref_info(jc, counter, value_bin)
+            print_interface_method_ref_info(counter, value_bin)
         elif tag == 12:
-            value = print_name_and_type_info(jc, counter, value_bin)
+            print_name_and_type_info(counter, value_bin)
         elif tag == 15:
-            value1 = int.from_bytes(value_bin, byteorder='big')
-            value_bin2 = jc.read(2)
-            value2 = int.from_bytes(value_bin2, byteorder='big')
-            value = (value1, value2)
-            print("#{:5}: {:5} = [{} -> {}]" .format(counter, tag, method_handel_tags[value1], value2))
-        # Exit if you encounter an unknown tag
+            print_method_handle_info(counter, value_bin)
         else:
             print("ERROR!\nUnknown tag {} at index {}!" .format(tag, counter))
             sys.exit(1)
-        constant_pool.append(value)
 
 def print_interfaces(jc, interfaces_count):
     """
@@ -239,7 +235,7 @@ def print_attributes(jc, attributes_count):
 
 # Constant pool descriptors
 
-def print_utf8_info(jc, counter, value_bin):
+def print_utf8_info(counter, value_bin):
     """
      CONSTANT_Utf8_info: Print UTF-String
 
@@ -248,11 +244,12 @@ def print_utf8_info(jc, counter, value_bin):
      U2: Length
      U1: bytes[Length] - UTF-8 encoded characters
     """
+    tag = 1
     value = codecs.decode(value_bin,"utf-8")
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
-    return value
+    constant_pool.append(value)
 
-def print_integer_info(jc, counter, value_bin):
+def print_integer_info(counter, value_bin):
     """
     CONSTANT_Integer_info: Print integer
 
@@ -261,11 +258,12 @@ def print_integer_info(jc, counter, value_bin):
     U4: bytes = Value of the Int constant
     Uses same structure as CONSTANT_Integer_info
     """
+    tag = 3
     value = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
-    return value
+    constant_pool.append(value)
 
-def print_float_info(jc, counter, value_bin):
+def print_float_info(counter, value_bin):
     """
     CONSTANT_Float_info: Print float
 
@@ -274,11 +272,12 @@ def print_float_info(jc, counter, value_bin):
     U4: bytes = Value of the Float constant
     Uses same structure as CONSTANT_Integer_info
     """
+    tag = 4
     value = float(value_bin, 16)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
-    return value
+    constant_pool.append(value)
 
-def print_long_info(jc, counter, value_bin):
+def print_long_info(counter, value_bin):
     """
     CONSTANT_Long_info: Print float
 
@@ -291,17 +290,19 @@ def print_long_info(jc, counter, value_bin):
     As noted in official documentation: 'In retrospect, making 8-byte constants
         take two constant pool entries was a poor choice.'
     """
+    tag = 5
     value = long(value_bin, 16)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     counter+=1
     return (value, counter)
+    constant_pool.append(value)
 
-def print_double_info(jc, counter, value_bin):
+def print_double_info(counter, value_bin):
     """
     CONSTANT_Double_info: Print double
 
     Data structure:
-    U1: Tag = 5
+    U1: Tag = 6
     U4: high_bytes
     U4: Low bytes
     ---
@@ -309,12 +310,13 @@ def print_double_info(jc, counter, value_bin):
     As noted in official documentation: 'In retrospect, making 8-byte constants
         take two constant pool entries was a poor choice.'
     """
+    tag = 6
     value = float(value_bin, 16)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     counter+=1
-    return (value, counter)
+    constant_pool.append(value)
 
-def print_class_info(jc, counter, value_bin):
+def print_class_info(counter, value_bin):
     """
     CONSTANT_Class_info: Print constant class (or interface) information.
 
@@ -326,9 +328,9 @@ def print_class_info(jc, counter, value_bin):
     tag = 7
     value = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
-    return value
+    constant_pool.append(value)
 
-def print_string_info(jc, counter, value_bin):
+def print_string_info(counter, value_bin):
     """
     CONSTANT_String_info: Print constant String information.
 
@@ -339,9 +341,9 @@ def print_string_info(jc, counter, value_bin):
     tag = 8
     value = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
-    return value
+    constant_pool.append(value)
 
-def print_field_ref_info(jc, counter, value_bin):
+def print_field_ref_info(counter, value_bin):
     """
     CONSTANT_Fieldref_info: Print Field information.
 
@@ -356,9 +358,9 @@ def print_field_ref_info(jc, counter, value_bin):
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
-    value       = (value1, value2)
+    constant_pool.append((value1, value2))
 
-def print_method_ref_info(jc, counter, value_bin):
+def print_method_ref_info(counter, value_bin):
     """
     CONSTANT_Methodref_info: Print Method information.
 
@@ -372,9 +374,9 @@ def print_method_ref_info(jc, counter, value_bin):
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
-    return (value1, value2)
+    constant_pool.append((value1, value2))
 
-def print_interface_method_ref_info(jc, counter, value_bin):
+def print_interface_method_ref_info(counter, value_bin):
     """
     CONSTANT_InterfaceMethodref_info: Print Interface method information.
 
@@ -389,9 +391,9 @@ def print_interface_method_ref_info(jc, counter, value_bin):
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
-    return (value1, value2)
+    constant_pool.append((value1, value2))
 
-def print_name_and_type_info(jc, counter, value_bin):
+def print_name_and_type_info(counter, value_bin):
     """
     CONSTANT_NameAndType_info: Print Name and type information.
 
@@ -405,9 +407,29 @@ def print_name_and_type_info(jc, counter, value_bin):
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
     print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
-    return (value1, value2)
+    constant_pool.append((value1, value2))
 
-# TAG - 15 - MethodHandle
+def print_method_handle_info(counter, value_bin):
+    """
+    CONSTANT_MethodHandle_info: Prints Method handle information.
+
+    Data structure:
+    U1: Tag = 15
+    U1: reference_kind - values 1-9
+    U2: reference_index - Index of the CP table.
+    ---
+    Based on the reference_kind, Reference index must point to a certain type:
+    - reference_kind (1,2,3,4) -> CONSTANT_Fieldref_info
+    - reference_kind (5,6,7,8) -> CONSTANT_Methodref_info
+    - reference_kind (9) -> CONSTANT_InterfaceMethodref_info
+    """
+    tag = 15
+    value1 = int.from_bytes(value_bin, byteorder='big')
+    value_bin2 = jc.read(2)
+    value2 = int.from_bytes(value_bin2, byteorder='big')
+    print("#{:5}: {:5} = [{} -> {}]" .format(counter, tag, method_handel_tags[value1], value2))
+    constant_pool.append((value1, value2))
+
 # TAG - 16 - MethodType
 # TAG - 18 - InvokeDynamic
 
