@@ -83,35 +83,23 @@ def print_cp_info(jc, constant_pool_count):
         else:
             # Which in case of the UTF-8 type is written in the first 2 bytes
             read_bytes = int.from_bytes(jc.read(2), byteorder='big')
+
         value_bin = jc.read(read_bytes)
-        # Strings
         if tag == 1:
             value = codecs.decode(value_bin,"utf-8")
             print("#{:5}: {:5} = {}" .format(counter, tag, value))
-        # Ints
         elif tag == 3:
-            value = int.from_bytes(value_bin, byteorder='big')
-            print("#{:5}: {:5} = {}" .format(counter, tag, value))
-        # Float
+            value = print_integer_info(jc, counter, value_bin)
         elif tag == 4:
-            value = float(value_bin, 16)
-            print("#{:5}: {:5} = {}" .format(counter, tag, value))
-        # Long
+            value = print_float_info(jc, counter, value_bin)
         elif tag == 5:
-            value = long(value_bin, 16)
-            print("#{:5}: {:5} = {}" .format(counter, tag, value))
-            counter+=1
-        # Double
+            value, counter = print_long_info(jc, counter, value_bin)
         elif tag == 6:
-            value = float(value_bin, 16)
-            print("#{:5}: {:5} = {}" .format(counter, tag, value))
-            counter+=1
-        # Index
+            value, counter = print_double_info(jc, counter, value_bin)
         elif tag == 7:
             value = print_class_info(jc, counter, value_bin)
         elif tag == 8:
             value = print_string_info(jc, counter, value_bin)
-        # Index pair
         elif tag == 9:
             value = print_field_ref_info(jc, counter, value_bin)
         elif tag == 10:
@@ -253,10 +241,68 @@ def print_attributes(jc, attributes_count):
 # Constant pool descriptors
 
 # TAG - 1 - UTF-8
-# TAG - 3 - Integer
-# TAG - 4 - Float
-# TAG - 5 - Long
-# TAG - 6 - Double
+
+def print_integer_info(jc, counter, value_bin):
+    """
+    CONSTANT_Integer_info: Print integer
+
+    Data structure:
+    U1: Tag = 3
+    U4: bytes = Value of the Int constant
+    Uses same structure as CONSTANT_Integer_info
+    """
+    value = int.from_bytes(value_bin, byteorder='big')
+    print("#{:5}: {:5} = {}" .format(counter, tag, value))
+    return value
+
+def print_float_info(jc, counter, value_bin):
+    """
+    CONSTANT_Float_info: Print float
+
+    Data structure:
+    U1: Tag = 4
+    U4: bytes = Value of the Float constant
+    Uses same structure as CONSTANT_Integer_info
+    """
+    value = float(value_bin, 16)
+    print("#{:5}: {:5} = {}" .format(counter, tag, value))
+    return value
+
+def print_long_info(jc, counter, value_bin):
+    """
+    CONSTANT_Long_info: Print float
+
+    Data structure:
+    U1: Tag = 5
+    U4: high_bytes
+    U4: Low bytes
+    ---
+    Note: Takes 2 entries in the constant pool table - so we must skip 1 couter.
+    As noted in official documentation: 'In retrospect, making 8-byte constants
+        take two constant pool entries was a poor choice.'
+    """
+    value = long(value_bin, 16)
+    print("#{:5}: {:5} = {}" .format(counter, tag, value))
+    counter+=1
+    return (value, counter)
+
+def print_double_info(jc, counter, value_bin):
+    """
+    CONSTANT_Double_info: Print double
+
+    Data structure:
+    U1: Tag = 5
+    U4: high_bytes
+    U4: Low bytes
+    ---
+    Note: Takes 2 entries in the constant pool table - so we must skip 1 couter.
+    As noted in official documentation: 'In retrospect, making 8-byte constants
+        take two constant pool entries was a poor choice.'
+    """
+    value = float(value_bin, 16)
+    print("#{:5}: {:5} = {}" .format(counter, tag, value))
+    counter+=1
+    return (value, counter)
 
 def print_class_info(jc, counter, value_bin):
     """
