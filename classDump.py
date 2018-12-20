@@ -130,8 +130,8 @@ def print_utf8_info(counter, value_bin):
      U2: length
      U1: bytes[Length] - UTF-8 encoded characters
     """
-    tag = 1
-    value = codecs.decode(value_bin,"utf-8")
+    tag     = 1
+    value   = codecs.decode(value_bin,"utf-8")
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
 
@@ -144,8 +144,8 @@ def print_integer_info(counter, value_bin):
     U4: bytes = Value of the Int constant
     Uses same structure as CONSTANT_Integer_info
     """
-    tag = 3
-    value = int.from_bytes(value_bin, byteorder='big')
+    tag     = 3
+    value   = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
 
@@ -158,8 +158,8 @@ def print_float_info(counter, value_bin):
     U4: bytes = Value of the Float constant
     Uses same structure as CONSTANT_Integer_info
     """
-    tag = 4
-    value = float(value_bin, 16)
+    tag     = 4
+    value   = float(value_bin, 16)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
 
@@ -176,10 +176,9 @@ def print_long_info(counter, value_bin):
     As noted in official documentation: 'In retrospect, making 8-byte constants
         take two constant pool entries was a poor choice.'
     """
-    tag = 5
-    value = long(value_bin, 16)
+    tag     = 5
+    value   = long(value_bin, 16)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
-    counter+=1
     return (value, counter)
     constant_pool.append(value)
 
@@ -196,10 +195,9 @@ def print_double_info(counter, value_bin):
     As noted in official documentation: 'In retrospect, making 8-byte constants
         take two constant pool entries was a poor choice.'
     """
-    tag = 6
-    value = float(value_bin, 16)
+    tag     = 6
+    value   = float(value_bin, 16)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
-    counter+=1
     constant_pool.append(value)
 
 def print_class_info(counter, value_bin):
@@ -211,8 +209,8 @@ def print_class_info(counter, value_bin):
     U2: name_index - Contains index in the CP which contains an UTF-8 encoded
         name of a class or interface.
     """
-    tag = 7
-    value = int.from_bytes(value_bin, byteorder='big')
+    tag     = 7
+    value   = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
 
@@ -224,8 +222,8 @@ def print_string_info(counter, value_bin):
     U1: tag = 8
     U2: string_index - Index of CP containing UTF-8 string.
     """
-    tag = 8
-    value = int.from_bytes(value_bin, byteorder='big')
+    tag     = 8
+    value   = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
 
@@ -243,7 +241,11 @@ def print_field_ref_info(counter, value_bin):
     value1      = int.from_bytes(value_bin, byteorder='big')
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
-    print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+    print("#{:5}: {:5} = [{} : {}]" .format(
+        counter,
+        tag,
+        value1,
+        value2))
     constant_pool.append((value1, value2))
 
 def print_method_ref_info(counter, value_bin):
@@ -259,7 +261,11 @@ def print_method_ref_info(counter, value_bin):
     value1      = int.from_bytes(value_bin, byteorder='big')
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
-    print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+    print("#{:5}: {:5} = [{} : {}]" .format(
+        counter,
+        tag,
+        value1,
+        value2))
     constant_pool.append((value1, value2))
 
 def print_interface_method_ref_info(counter, value_bin):
@@ -276,7 +282,11 @@ def print_interface_method_ref_info(counter, value_bin):
     value1      = int.from_bytes(value_bin, byteorder='big')
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
-    print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+    print("#{:5}: {:5} = [{} : {}]" .format(
+        counter,
+        tag,
+        value1,
+        value2))
     constant_pool.append((value1, value2))
 
 def print_name_and_type_info(counter, value_bin):
@@ -292,7 +302,11 @@ def print_name_and_type_info(counter, value_bin):
     value1      = int.from_bytes(value_bin, byteorder='big')
     value_bin2  = jc.read(2)
     value2      = int.from_bytes(value_bin2, byteorder='big')
-    print("#{:5}: {:5} = [{} : {}]" .format(counter, tag, value1, value2))
+    print("#{:5}: {:5} = [{} : {}]" .format(
+        counter,
+        tag,
+        value1,
+        value2))
     constant_pool.append((value1, value2))
 
 def print_method_handle_info(counter, value_bin):
@@ -309,11 +323,14 @@ def print_method_handle_info(counter, value_bin):
     - reference_kind (5,6,7,8) -> CONSTANT_Methodref_info
     - reference_kind (9) -> CONSTANT_InterfaceMethodref_info
     """
-    tag = 15
-    value1 = int.from_bytes(value_bin, byteorder='big')
-    value_bin2 = jc.read(2)
-    value2 = int.from_bytes(value_bin2, byteorder='big')
-    print("#{:5}: {:5} = [{} -> {}]" .format(counter, tag, method_handel_tags[value1], value2))
+    tag         = 15
+    value1      = int.from_bytes(value_bin, byteorder='big')
+    value_bin2  = jc.read(2)
+    value2      = int.from_bytes(value_bin2, byteorder='big')
+    print("#{:5}: {:5} = [{} -> {}]" .format(
+        counter,
+        tag,
+        method_handel_tags[value1], value2))
     constant_pool.append((value1, value2))
 
 def print_method_type_info(counter, value_bin):
@@ -324,8 +341,8 @@ def print_method_type_info(counter, value_bin):
     U1: tag = 16
     U2: descriptor_index: CP table index -> Points to a method descriptor.
     """
-    tag =  16
-    value = int.from_bytes(value_bin, byteorder='big')
+    tag     =  16
+    value   = int.from_bytes(value_bin, byteorder='big')
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
 
@@ -339,10 +356,13 @@ def print_invoke_dynamic_info(counter, value_bin):
      U2: name_and_type_index valid index of the CP table.
     """
     tag = 18
-    value1 = int.from_bytes(value_bin, byteorder='big')
-    value_bin2 = jc.read(2)
-    value2 = int.from_bytes(value_bin2, byteorder='big')
-    print("#{:5}: {:5} = [{} -> {}]" .format(counter, tag, method_handel_tags[value1], value2))
+    value1      = int.from_bytes(value_bin, byteorder='big')
+    value_bin2  = jc.read(2)
+    value2      = int.from_bytes(value_bin2, byteorder='big')
+    print("#{:5}: {:5} = [{} -> {}]" .format(
+        counter,
+        tag,
+        method_handel_tags[value1], value2))
     constant_pool.append((value1, value2))
 
 def print_interfaces(jc, interfaces_count):
@@ -354,8 +374,8 @@ def print_interfaces(jc, interfaces_count):
     u2 - index pointing at the object in constant pool table
     """
     for counter in range(0, interfaces_count):
-        tag = int.from_bytes(jc.read(1), byteorder='big')
-        index = int.from_bytes(jc.read(2), byteorder='big')
+        tag     = int.from_bytes(jc.read(1), byteorder='big')
+        index   = int.from_bytes(jc.read(2), byteorder='big')
         print("#{:5}: {5}" .format(tags[tag][0], index))
 
 def print_fields (jc, fields_count):
@@ -381,15 +401,19 @@ def print_fields (jc, fields_count):
         0x4000 - enum
         """
         for counter in range(0, fields_count):
-            access_flags = codecs.decode(binascii.hexlify(jc.read(2)))
-            named_index = int.from_bytes(jc.read(2), byteorder='big')
-            descriptor_index = int.from_bytes(jc.read(2), byteorder='big')
-            attributes_count = int.from_bytes(jc.read(2), byteorder='big')
+            access_flags        = codecs.decode(binascii.hexlify(jc.read(2)))
+            named_index         = int.from_bytes(jc.read(2), byteorder='big')
+            descriptor_index    = int.from_bytes(jc.read(2), byteorder='big')
+            attributes_count    = int.from_bytes(jc.read(2), byteorder='big')
             if attributes_count:
                 print(" > Attributes:")
                 print_attributes(jc, attributes_count)
                 print(" > ---\n")
-            print("{} | [{}, {}] ( {} ):" .format(access_flags, named_index, descriptor_index, attributes_count))
+            print("{} | [{}, {}] ( {} ):" .format(
+                access_flags,
+                named_index,
+                descriptor_index,
+                attributes_count))
 
 def print_methods(jc, methods_count):
     """
@@ -416,16 +440,20 @@ def print_methods(jc, methods_count):
     0x1000 - SYNTHETIC
     """
     for counter in range(0, methods_count):
-        access_flags = codecs.decode(binascii.hexlify(jc.read(2)))
-        named_index = int.from_bytes(jc.read(2), byteorder='big')
-        descriptor_index = int.from_bytes(jc.read(2), byteorder='big')
-        attributes_count = int.from_bytes(jc.read(2), byteorder='big')
+        access_flags        = codecs.decode(binascii.hexlify(jc.read(2)))
+        named_index         = int.from_bytes(jc.read(2), byteorder='big')
+        descriptor_index    = int.from_bytes(jc.read(2), byteorder='big')
+        attributes_count    = int.from_bytes(jc.read(2), byteorder='big')
         if attributes_count:
             print(" > Attributes:")
             print_attributes(jc, attributes_count)
             print(" > ---\n")
 
-        print("{} | [{}, {}] ( {} ):" .format(access_flags, named_index, descriptor_index, attributes_count))
+        print("{} | [{}, {}] ( {} ):" .format(
+            access_flags,
+            named_index,
+            descriptor_index,
+            attributes_count))
 
 def print_exception_table(jc, exception_table_length):
     """
@@ -439,14 +467,19 @@ def print_exception_table(jc, exception_table_length):
     All 4 are constant_pool index values.
     """
 
-    print("Exception table({})[start_pc, end_pc, handler_pc, catch_type]:" .format(exception_table_length))
+    print("Exception table({})[start_pc, end_pc, handler_pc, catch_type]:"
+        .format(exception_table_length))
 
     for jc_exception in range(0, exception_table_length):
-        start_pc = int.from_bytes(jc.read(2), byteorder='big')
-        end_pc = int.from_bytes(jc.read(2), byteorder='big')
-        handler_pc = int.from_bytes(jc.read(2), byteorder='big')
-        catch_type = int.from_bytes(jc.read(2), byteorder='big')
-        print("-> {} | {} | {} | {}" .format(start_pc, end_pc, handler_pc, catch_type))
+        start_pc    = int.from_bytes(jc.read(2), byteorder='big')
+        end_pc      = int.from_bytes(jc.read(2), byteorder='big')
+        handler_pc  = int.from_bytes(jc.read(2), byteorder='big')
+        catch_type  = int.from_bytes(jc.read(2), byteorder='big')
+        print("-> {} | {} | {} | {}" .format(
+            start_pc,
+            end_pc,
+            handler_pc,
+            catch_type))
     print
 
 def print_attributes(jc, attributes_count):
@@ -461,7 +494,9 @@ def print_attributes(jc, attributes_count):
         attribute_name_index = int.from_bytes(jc.read(2), byteorder='big')
         attribute_lenght = int.from_bytes(jc.read(4), byteorder='big')
         value = int.from_bytes(jc.read(attribute_lenght), byteorder='big')
-        print(" - {} ( {} )" .format(attribute_name_index, attribute_lenght))
+        print(" - {} ( {} )" .format(
+            attribute_name_index,
+            attribute_lenght))
 
 ################################################################################
 
@@ -472,19 +507,24 @@ print("#########################################################################
 # Magic - 4 bytes
 # First 4 Bytes also known as Magic number, spell "CAFE BABE".
 # We use binascii.hexlify and codecs.decode to decode from hex to UTF-8 string
-print("Magic: {} {}" .format(codecs.decode(binascii.hexlify(jc.read(2)), "UTF-8"), codecs.decode(binascii.hexlify(jc.read(2)), "UTF-8")))
+print("Magic: {} {}" .format(
+    codecs.decode(binascii.hexlify(jc.read(2)), "UTF-8"),
+    codecs.decode(binascii.hexlify(jc.read(2)), "UTF-8")))
 
 # Minor version - [2 bytes] + Major version - [2 bytes]
 # Since Minor version is in the file first, we need to swap them.
 # We use base 16 for integer conversion
-print("Version: {1}.{0}" .format(int.from_bytes(jc.read(2), byteorder='big'), int.from_bytes(jc.read(2), byteorder='big')))
+print("Version: {1}.{0}" .format(
+    int.from_bytes(jc.read(2), byteorder='big'),
+    int.from_bytes(jc.read(2), byteorder='big')))
 
 # Constant_pool_count - [2 bytes]
 constant_pool_count = int.from_bytes(jc.read(2), byteorder='big')
 print("Constant_pool_count: {}" .format(constant_pool_count))
 
 # cp_info - [constant_pool_count - 1]
-# cp_info contains 1 less item than constant_pool_count state - makes for loops easier.
+# cp_info contains 1 less item than constant_pool_count state -
+# makes for loops easier.
 print("cp_info:\n---")
 
 print_cp_info(jc, constant_pool_count)
