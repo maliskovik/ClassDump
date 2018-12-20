@@ -17,6 +17,7 @@ import sys
 import binascii
 import codecs
 import os
+import struct
 
 ################################################################################
 
@@ -63,7 +64,7 @@ method_handel_tags = {
     9:"invoke_interface" }
 
 # Empty constant pool
-constant_pool=[]
+constant_pool = []
 
 ################################################################################
 
@@ -72,9 +73,14 @@ constant_pool=[]
 def print_cp_info(jc, constant_pool_count):
     """
     Work trough the constant pool, and pretty print it.
-    """
 
+    All CP items begin with a tag(1 byte).
+    """
+    pass_step       = False;
     for counter in range(1,constant_pool_count):
+        if pass_step:
+            pass_step = False
+            continue
         # First we reed the 1 byte of that tag info to get the type
         tag = int.from_bytes(jc.read(1), byteorder='big')
         # With the type known we get the value length
@@ -93,10 +99,10 @@ def print_cp_info(jc, constant_pool_count):
             print_float_info(counter, value_bin)
         elif tag == 5:
             print_long_info(counter, value_bin)
-            counter+=1
+            pass_step = True
         elif tag == 6:
             print_double_info(counter, value_bin)
-            counter+=1
+            pass_step = True
         elif tag == 7:
             print_class_info(counter, value_bin)
         elif tag == 8:
@@ -119,7 +125,7 @@ def print_cp_info(jc, constant_pool_count):
             print("ERROR!\nUnknown tag {} at index {}!" .format(tag, counter))
             sys.exit(1)
 
-# Constant pool descriptors
+# ***Constant pool descriptors***
 
 def print_utf8_info(counter, value_bin):
     """
@@ -159,7 +165,7 @@ def print_float_info(counter, value_bin):
     Uses same structure as CONSTANT_Integer_info
     """
     tag     = 4
-    value   = float(value_bin, 16)
+    value   =  struct.unpack('f',value_bin)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
 
@@ -179,7 +185,6 @@ def print_long_info(counter, value_bin):
     tag     = 5
     value   = long(value_bin, 16)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
-    return (value, counter)
     constant_pool.append(value)
 
 def print_double_info(counter, value_bin):
@@ -196,7 +201,7 @@ def print_double_info(counter, value_bin):
         take two constant pool entries was a poor choice.'
     """
     tag     = 6
-    value   = float(value_bin, 16)
+    value   = struct.unpack('d',value_bin)
     print("#{:5}: {:5} = {}" .format(counter, tag, value))
     constant_pool.append(value)
 
@@ -235,7 +240,7 @@ def print_field_ref_info(counter, value_bin):
     U1: tag = 9
     U2: class_index - valid index in the CP. Must point to an Class type.
     U2: name_and_type_index - calid index in the CP
-    Same data structure as
+    Same data structure as¸
     """
     tag         = 9
     value1      = int.from_bytes(value_bin, byteorder='big')
@@ -364,6 +369,8 @@ def print_invoke_dynamic_info(counter, value_bin):
         tag,
         method_handel_tags[value1], value2))
     constant_pool.append((value1, value2))
+
+# ***Interfaces*** #
 
 def print_interfaces(jc, interfaces_count):
     """
